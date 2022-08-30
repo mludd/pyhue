@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import wx
 from wx.lib.expando import ExpandoTextCtrl
-from .clipv2 import Clipv2
 
 
 class Light(wx.Panel):
