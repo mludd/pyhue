@@ -77,32 +77,6 @@ class Clipv2:
             return output
         return False
 
-    def turn_on_light(self, light_id):
-        """
-        Sets light state to on
-        :param light_id:
-        :return:
-        """
-        body = {
-            'on': {
-                'on': True
-            }
-        }
-        return self.call_put('resource/light/'+light_id, json.dumps(body))
-
-    def turn_off_light(self, light_id):
-        """
-        Sets light state to off
-        :param light_id:
-        :return:
-        """
-        body = {
-            'on': {
-                'on': False
-            }
-        }
-        return self.call_put('resource/light/'+light_id, json.dumps(body))
-
     def set_light_state(self, light_id, state):
         """
         Sets the light state

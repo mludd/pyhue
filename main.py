@@ -3,8 +3,9 @@
 
 import wx
 from hue import Clipv2, Light
-from worker import Worker, Request, Response
+from worker import Worker, Request
 from queue import Queue
+from time import time_ns
 
 
 class MainFrame(wx.Frame):
@@ -33,7 +34,8 @@ class MainFrame(wx.Frame):
         # Set up a timer to regularly poll the light states from the API
         self.busy = False
         self.timer = wx.Timer(self)
-        self.timer.Start(1000)
+        self.last_full_update = time_ns()
+        self.timer.Start(200)
         self.Bind(wx.EVT_TIMER, self.update_light_states)
 
     def on_close(self, event):
@@ -41,8 +43,6 @@ class MainFrame(wx.Frame):
         Executes every time the main frame closes
         :return:
         """
-        self.thread.stop()
-        self.thread.join()
         self.Destroy()
 
     def update_light_states(self, event):
@@ -55,17 +55,18 @@ class MainFrame(wx.Frame):
             return
         self.busy = True
 
-        print("Putting list_lights request on queue")
-        self.request_queue.put(Request('list_lights'))
+        if time_ns() > self.last_full_update + 1000000000:
+            print("Putting list_lights request on queue")
+            self.request_queue.put(Request('list_lights'))
+            self.last_full_update = time_ns()
 
         for light_panel in self._panels:
             if light_panel.new_state:
                 self.thread.request_queue.put(Request('set_light_state', light_panel.new_state, light_panel.light_id))
+                light_panel.new_state = {}
 
         while not self.thread.response_queue.empty():
             response = self.thread.response_queue.get()
-            print("Found response:")
-            print(response)
             if response.light_id and response.payload:
                 print("Updating state for individual light "+response.light_id)
                 self.get_light_panel_with_id(response.light_id).set_state(response.payload)
@@ -77,7 +78,7 @@ class MainFrame(wx.Frame):
 
     def set_light_states(self, lights):
         for light_id, light in lights.items():
-            light_panel =  self.get_light_panel_with_id(light_id)
+            light_panel = self.get_light_panel_with_id(light_id)
             if light_panel:
                 light_panel.set_state(light)
 

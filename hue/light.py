@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 import wx
-from wx.lib.expando import ExpandoTextCtrl, EVT_ETC_LAYOUT_NEEDED
+from wx.lib.expando import ExpandoTextCtrl
 from .clipv2 import Clipv2
-from threading import Thread
 
 
 class Light(wx.Panel):
@@ -93,15 +92,19 @@ class Light(wx.Panel):
         self.brightness_slider.SetPosition((10, 90))
 
     def toggle(self, event):
-        h = Clipv2()
-
         if self.is_on():
-            h.turn_off_light(self.light_id)
+            # h.turn_off_light(self.light_id)
+            self.new_state['on'] = {
+                'on': False
+            }
         else:
-            h.turn_on_light(self.light_id)
+            # h.turn_on_light(self.light_id)
+            self.new_state['on'] = {
+                'on': True
+            }
 
-        state = h.get_light_state(self.light_id)
-        self.set_state(state)
+        # state = h.get_light_state(self.light_id)
+        # self.set_state(state)
 
     def set_brightness(self, event):
         """
@@ -109,7 +112,6 @@ class Light(wx.Panel):
         :param event:
         :return:
         """
-        h = Clipv2()
         slider_value = self.brightness_slider.GetValue()
         if slider_value < self.state['dimming']['min_dim_level'] or slider_value > 100:
             return
@@ -117,19 +119,6 @@ class Light(wx.Panel):
         self.new_state['dimming'] = {
             'brightness': slider_value
         }
-
-    def update_state(self):
-        h = Clipv2()
-
-        if self.new_state:
-            if h.set_light_state(self.light_id, self.new_state):
-                self.new_state = {}
-
-        state = h.get_light_state(self.light_id)
-        if state:
-            self.set_state(state)
-
-        self.busy = False
 
     def is_on(self):
         """

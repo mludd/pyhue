@@ -5,6 +5,7 @@ from threading import Thread
 from queue import Queue
 from .response import Response
 
+
 class Worker(Thread):
     """
     Update worker that handles all communication with the Hue API
@@ -21,4 +22,6 @@ class Worker(Thread):
             if request.request_type == "list_lights":
                 self.response_queue.put(Response(self.hue.list_lights()))
             elif request.request_type == 'set_light_state':
-                self.response_queue.put(Response(self.hue.set_light_state(request.light_id, request.payload)))
+                self.hue.set_light_state(request.light_id, request.payload)
+                state = self.hue.get_light_state(request.light_id)
+                self.response_queue.put(Response(state, request.light_id))
