@@ -56,7 +56,6 @@ class MainFrame(wx.Frame):
         self.busy = True
 
         if time_ns() > self.last_full_update + 1000000000:
-            print("Putting list_lights request on queue")
             self.request_queue.put(Request('list_lights'))
             self.last_full_update = time_ns()
 
@@ -69,27 +68,33 @@ class MainFrame(wx.Frame):
         while not self.thread.response_queue.empty():
             response = self.thread.response_queue.get()
             if response.light_id and response.payload:
-                print("Updating state for individual light "+response.light_id)
                 light_panel = self.get_light_panel_with_id(response.light_id)
                 if light_panel.expected_updates <= 1:
                     light_panel.set_state(response.payload)
-
                 if light_panel.expected_updates > 0:
                     light_panel.expected_updates -= 1
-                # self.get_light_panel_with_id(response.light_id).set_state(response.payload)
             elif not response.light_id:
-                print("Found complete state update, updating state for all lights")
                 self.set_light_states(response.payload)
 
         self.busy = False
 
     def set_light_states(self, lights):
+        """
+        Update all lights that are found in input as long as they aren't expecting state updates
+        :param lights:
+        :return:
+        """
         for light_id, light in lights.items():
             light_panel = self.get_light_panel_with_id(light_id)
             if light_panel and light_panel.expected_updates == 0:
                 light_panel.set_state(light)
 
     def get_light_panel_with_id(self, light_id):
+        """
+        Fetches the matching light panel or None if one can't be found
+        :param light_id:
+        :return:
+        """
         for light_panel in self._panels:
             if light_panel.light_id == light_id:
                 return light_panel

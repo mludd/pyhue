@@ -74,6 +74,11 @@ class Light(wx.Panel):
         return False
 
     def set_state(self, state):
+        """
+        Update the panel's state using supplied state from the Clipv2 API
+        :param state:
+        :return:
+        """
         self.state = state
         self.brightness_slider.SetValue(int(state['dimming']['brightness']))
         self.brightness_slider.SetMin(int(state['dimming']['min_dim_level']))
@@ -92,19 +97,19 @@ class Light(wx.Panel):
         self.brightness_slider.SetPosition((10, 90))
 
     def toggle(self, event):
+        """
+        Toggle light on state
+        :param event:
+        :return:
+        """
         if self.is_on():
-            # h.turn_off_light(self.light_id)
             self.new_state['on'] = {
                 'on': False
             }
         else:
-            # h.turn_on_light(self.light_id)
             self.new_state['on'] = {
                 'on': True
             }
-
-        # state = h.get_light_state(self.light_id)
-        # self.set_state(state)
 
     def set_brightness(self, event):
         """
