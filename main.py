@@ -64,12 +64,16 @@ class MainFrame(wx.Frame):
             if light_panel.new_state:
                 self.thread.request_queue.put(Request('set_light_state', light_panel.new_state, light_panel.light_id))
                 light_panel.new_state = {}
+                light_panel.waiting_on_update = True
 
         while not self.thread.response_queue.empty():
             response = self.thread.response_queue.get()
             if response.light_id and response.payload:
                 print("Updating state for individual light "+response.light_id)
-                self.get_light_panel_with_id(response.light_id).set_state(response.payload)
+                light_panel = self.get_light_panel_with_id(response.light_id)
+                light_panel.set_state(response.payload)
+                light_panel.waiting_on_update = False
+                # self.get_light_panel_with_id(response.light_id).set_state(response.payload)
             elif not response.light_id:
                 print("Found complete state update, updating state for all lights")
                 self.set_light_states(response.payload)
@@ -79,7 +83,7 @@ class MainFrame(wx.Frame):
     def set_light_states(self, lights):
         for light_id, light in lights.items():
             light_panel = self.get_light_panel_with_id(light_id)
-            if light_panel:
+            if light_panel and not light_panel.waiting_on_update:
                 light_panel.set_state(light)
 
     def get_light_panel_with_id(self, light_id):

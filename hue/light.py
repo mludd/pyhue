@@ -18,6 +18,7 @@ class Light(wx.Panel):
         # Set up our data
         self.light_id = light_id
         self.state = None
+        self.waiting_on_update = False
         self.new_state = {}
         self.name = ''
         self.set_state(light_state)
