@@ -23,7 +23,7 @@ class Light(wx.Panel):
         self.set_state(light_state)
 
         # Layout
-        self.sizer_flexi = wx.FlexGridSizer(3, 1, 0, 0)
+        self.sizer_flexi = wx.FlexGridSizer(4, 1, 0, 0)
         self.SetSizer(self.sizer_flexi)
         self.SetSize((800, 200))
         self.sizer_flexi.Fit(self)
@@ -32,6 +32,7 @@ class Light(wx.Panel):
         self.sizer_flexi.Add(self.name_ctrl)
         self.sizer_flexi.Add(self.toggle_button)
         self.sizer_flexi.Add(self.brightness_slider)
+        self.sizer_flexi.Add(self.color_slider)
         self.Layout()
 
     def get_new_name_control(self):
@@ -68,10 +69,13 @@ class Light(wx.Panel):
 
     def get_new_color_slider(self):
         """
-        Todo: Creates color slider
+        Creates color slider
         :return:
         """
-        return False
+        slider = wx.Slider(self, wx.ID_ANY, 1, 1, 100, style=wx.TE_CENTRE)
+        slider.SetMinSize((200, 40))
+        slider.Bind(wx.EVT_SLIDER, self.set_color_temperature)
+        return slider
 
     def set_state(self, state):
         """
@@ -83,11 +87,20 @@ class Light(wx.Panel):
         self.brightness_slider.SetValue(int(state['dimming']['brightness']))
         self.brightness_slider.SetMin(int(state['dimming']['min_dim_level']))
         self.brightness_slider.Enable(self.is_on())
+
+        self.color_slider.SetMin(int(state['color_temperature']['mirek_schema']['mirek_minimum']))
+        self.color_slider.SetMax(int(state['color_temperature']['mirek_schema']['mirek_maximum']))
+        self.color_slider.SetValue(int(state['color_temperature']['mirek']))
+
         self.name = state['metadata']['name']
         self.name_ctrl.SetValue(self.name)
         self.toggle_button.SetLabelText("Turn off" if self.is_on() else "Turn on")
 
     def __set_properties(self):
+        """
+        Set panel properties
+        :return:
+        """
         self.name_ctrl.SetMinSize((400, -1))
         self.name_ctrl.SetMaxSize((400, -1))
         self.name_ctrl.SetPosition((10, 0))
@@ -123,6 +136,21 @@ class Light(wx.Panel):
 
         self.new_state['dimming'] = {
             'brightness': slider_value
+        }
+
+    def set_color_temperature(self, event):
+        """
+        Queues up a color temperature change
+        :param event:
+        :return:
+        """
+        slider_value = self.color_slider.GetValue()
+        if slider_value < self.state['color_temperature']['mirek_schema']['mirek_minimum']\
+                or slider_value > self.state['color_temperature']['mirek_schema']['mirek_maximum']:
+            return
+
+        self.new_state['color_temperature'] = {
+            'mirek': slider_value
         }
 
     def is_on(self):

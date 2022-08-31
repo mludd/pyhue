@@ -12,7 +12,7 @@ class MainFrame(wx.Frame):
     def __init__(self, *args, **kwargs):
         kwargs["style"] = kwargs.get("style", 0) | wx.DEFAULT_FRAME_STYLE
         wx.Frame.__init__(self, *args, **kwargs)
-        self.SetSize((600, 900))
+        self.SetSize((600, 1200))
 
         # Worker thread setup
         self.request_queue = Queue()
