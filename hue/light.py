@@ -11,8 +11,16 @@ class Light(wx.Panel):
         # First we set up our controls
         self.name_ctrl = self.get_new_name_control()
         self.toggle_button = self.get_new_toggle_button()
+        self.brightness_slider_label = self.get_new_label('Brightness')
         self.brightness_slider = self.get_new_brightness_slider()
+        self.brightness_slider_box = wx.BoxSizer(wx.HORIZONTAL)
+        self.brightness_slider_box.Add(self.brightness_slider_label)
+        self.brightness_slider_box.Add(self.brightness_slider)
+        self.color_slider_label = self.get_new_label('Color temperature')
         self.color_slider = self.get_new_color_slider()
+        self.color_slider_box = wx.BoxSizer(wx.HORIZONTAL)
+        self.color_slider_box.Add(self.color_slider_label)
+        self.color_slider_box.Add(self.color_slider)
 
         # Set up our data
         self.light_id = light_id
@@ -31,17 +39,30 @@ class Light(wx.Panel):
         self.sizer_flexi.AddGrowableCol(0)
         self.sizer_flexi.Add(self.name_ctrl)
         self.sizer_flexi.Add(self.toggle_button)
-        self.sizer_flexi.Add(self.brightness_slider)
-        self.sizer_flexi.Add(self.color_slider)
+        self.sizer_flexi.Add(self.brightness_slider_box)
+        self.sizer_flexi.Add(self.color_slider_box)
         self.Layout()
+
+    def get_new_label(self, text):
+        """
+        Generates a new label
+        :param text:
+        :return:
+        """
+        control = wx.StaticText(self, wx.ID_ANY, text)
+        return control
 
     def get_new_name_control(self):
         """
         Creates the name label text control
         :return:
         """
-        control = ExpandoTextCtrl(self, wx.ID_ANY, "",
-                                  style=wx.BORDER_NONE | wx.TE_CENTRE | wx.TE_MULTILINE | wx.TE_NO_VSCROLL)
+        # control = ExpandoTextCtrl(self, wx.ID_ANY, "",
+        #                           style=wx.BORDER_NONE | wx.TE_CENTRE | wx.TE_MULTILINE | wx.TE_NO_VSCROLL)
+        control = wx.StaticText(self, wx.ID_ANY, "")
+        font = control.GetFont()
+        font.SetPointSize(18)
+        control.SetFont(font)
         control.SetMinSize((550, 40))
         control.SetPosition((0, 0))
         return control
@@ -91,9 +112,10 @@ class Light(wx.Panel):
         self.color_slider.SetMin(int(state['color_temperature']['mirek_schema']['mirek_minimum']))
         self.color_slider.SetMax(int(state['color_temperature']['mirek_schema']['mirek_maximum']))
         self.color_slider.SetValue(int(state['color_temperature']['mirek']))
+        self.color_slider.Enable(self.is_on())
 
         self.name = state['metadata']['name']
-        self.name_ctrl.SetValue(self.name)
+        self.name_ctrl.SetLabel(self.name)
         self.toggle_button.SetLabelText("Turn off" if self.is_on() else "Turn on")
 
     def __set_properties(self):
