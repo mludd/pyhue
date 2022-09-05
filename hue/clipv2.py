@@ -77,6 +77,19 @@ class Clipv2:
             return output
         return False
 
+    def list_rooms(self):
+        """
+        List all configured rooms
+        :return:
+        """
+        data = self.call_get('resource/room')
+        if data and type(data) != bool:
+            output = {}
+            for room in data['data']:
+                output[room['id']] = room
+            return output
+        return False
+
     def set_light_state(self, light_id, state):
         """
         Sets the light state

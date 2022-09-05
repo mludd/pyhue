@@ -11,16 +11,15 @@ class Light(wx.Panel):
         # First we set up our controls
         self.name_ctrl = self.get_new_name_control()
         self.toggle_button = self.get_new_toggle_button()
+        self.slider_box = wx.GridSizer(cols=2, gap=wx.Size(2, 2))
         self.brightness_slider_label = self.get_new_label('Brightness')
         self.brightness_slider = self.get_new_brightness_slider()
-        self.brightness_slider_box = wx.BoxSizer(wx.HORIZONTAL)
-        self.brightness_slider_box.Add(self.brightness_slider_label)
-        self.brightness_slider_box.Add(self.brightness_slider)
+        self.slider_box.Add(self.brightness_slider_label, 0, wx.ALIGN_RIGHT)
+        self.slider_box.Add(self.brightness_slider, 0, wx.ALIGN_LEFT)
         self.color_slider_label = self.get_new_label('Color temperature')
         self.color_slider = self.get_new_color_slider()
-        self.color_slider_box = wx.BoxSizer(wx.HORIZONTAL)
-        self.color_slider_box.Add(self.color_slider_label)
-        self.color_slider_box.Add(self.color_slider)
+        self.slider_box.Add(self.color_slider_label, 0, wx.ALIGN_RIGHT)
+        self.slider_box.Add(self.color_slider, 0, wx.ALIGN_LEFT)
 
         # Set up our data
         self.light_id = light_id
@@ -31,7 +30,7 @@ class Light(wx.Panel):
         self.set_state(light_state)
 
         # Layout
-        self.sizer_flexi = wx.FlexGridSizer(4, 1, 0, 0)
+        self.sizer_flexi = wx.FlexGridSizer(3, 1, 0, 0)
         self.SetSizer(self.sizer_flexi)
         self.SetSize((800, 200))
         self.sizer_flexi.Fit(self)
@@ -39,8 +38,7 @@ class Light(wx.Panel):
         self.sizer_flexi.AddGrowableCol(0)
         self.sizer_flexi.Add(self.name_ctrl)
         self.sizer_flexi.Add(self.toggle_button)
-        self.sizer_flexi.Add(self.brightness_slider_box)
-        self.sizer_flexi.Add(self.color_slider_box)
+        self.sizer_flexi.Add(self.slider_box)
         self.Layout()
 
     def get_new_label(self, text):
@@ -57,8 +55,6 @@ class Light(wx.Panel):
         Creates the name label text control
         :return:
         """
-        # control = ExpandoTextCtrl(self, wx.ID_ANY, "",
-        #                           style=wx.BORDER_NONE | wx.TE_CENTRE | wx.TE_MULTILINE | wx.TE_NO_VSCROLL)
         control = wx.StaticText(self, wx.ID_ANY, "")
         font = control.GetFont()
         font.SetPointSize(18)
@@ -196,7 +192,7 @@ class Light(wx.Panel):
         :param text:
         :return:
         """
-        self.name_ctrl.SetValue(text)
+        self.name_ctrl.SetLabel(text)
         self.sizer_flexi.Add(self.name_ctrl, 1, wx.EXPAND | wx.ALL, 10)
         self.Layout()
 
