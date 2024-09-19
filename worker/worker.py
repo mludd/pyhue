@@ -12,6 +12,7 @@ class Worker(Thread):
     """
     def __init__(self, request_queue, args=(), kwargs=None):
         threading.Thread.__init__(self, args=args, kwargs=kwargs)
+        self.daemon = True
         self.hue = Clipv2()
         self.response_queue = Queue()
         self.request_queue = request_queue
